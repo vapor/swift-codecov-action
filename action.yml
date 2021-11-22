@@ -41,7 +41,7 @@ runs:
       shell: bash
       run: |
         pkgname="$(swift package --package-path ${{ inputs.package_path }} dump-package | \
-                   perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')
+                   perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')"
         binpath="$(swift build --package-path ${{ inputs.package_path }} ${{ inputs.build_parameters }} --show-bin-path)"
         covpath="$(dirname "$(swift test --package-path ${{ inputs.package_path }} ${{ inputs.build_parameters }} --show-codecov-path)")"
         binname="${pkgname}PackageTests.xctest"
