@@ -5,10 +5,6 @@ branding:
   color: orange
 
 inputs:
-  #skip_upload:
-  #  description: If set to true, no coverage data is uploaded to Codecov, and all Codecov-related parameters are ignored.
-  #  required: false
-  #  default: true
   ignore_paths:
     description: A list of regular expressions, one per line, which specify paths in the repository which will not be included in the coverage data. By default, the /.build/ folder is always ignored.
     required: false
@@ -31,6 +27,7 @@ inputs:
   cc_env_vars:         { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
   cc_fail_ci_if_error: { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
   cc_verbose:          { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
+  cc_dry_run:          { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
   
 outputs:
   codecov_file:
@@ -70,6 +67,7 @@ runs:
         if [[ -n "${{ inputs.cc_env_vars }}" ]]; then cc_params+='"env_vars": "${{ inputs.cc_env_vars }}", '; fi
         if [[ -n "${{ inputs.cc_fail_ci_if_error }}" ]]; then cc_params+='"fail_ci_if_error": ${{ inputs.cc_fail_ci_if_error }}, '; fi
         if [[ -n "${{ inputs.cc_verbose }}" ]]; then cc_params+='"verbose": ${{ inputs.cc_verbose }}, '; fi
+        if [[ -n "${{ inputs.cc_dry_run }}" ]]; then cc_params+='"dry_run": ${{ inputs.cc_dry_run }}, '; fi
         cc_params+='"files": "${{ env.COVERAGE_OUTPUT }}"}'
         echo "CODECOV_ACTION_PARAMS=${cc_params}" >>"${GITHUB_ENV}"
     - id: upload-coverage-report
