@@ -12,7 +12,9 @@ inputs:
   package_path:
     description: The location of the repository. Defaults to $GITHUB_WORKSPACE. This will be used as the working_directory for the Codecov upload action.
     required: false
-    default: ${{ github.workspace }}
+    # N.B.: Can not simply default to github.workspace here, as it will not be correctly updated when the action is called from
+    # within a job which runs in a container.
+    default: 
   build_parameters:
     description: Additional parameters needed by swift build and swift test to disambiguate the correct target and configuration, i.e. -c release. Only flags which affect the output binary path are required.
     required: false
@@ -31,57 +33,59 @@ inputs:
   
 outputs:
   codecov_file:
-    description: The absolute path of the converted code coverage data. Only set if the output_path parameter was provided.
+    description: The absolute path of the converted code coverage data.
     value: ${{ steps.save-converted-output.outputs.output_path }}
 
 runs:
   using: composite
   steps:
+  
     - id: determine-package-info
       shell: bash
       run: |
-        env
-        cat <<'EOF'
-        ${{ toJSON(github) }}
-        ${{ toJSON(runner) }}
-        EOF
-        pkgname="$(swift package --package-path ${{ inputs.package_path }} dump-package | \
+        if [[ -n '${{ inputs.package_path }}' ]]; then pkgpath='${{ inputs.package_path }}'; else pkgpath="${GITHUB_WORKSPACE}"; fi
+        
+        pkgname="$(swift package --package-path "${pkgpath}" dump-package | \
                    perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')"
-        binpath="$(swift build --package-path ${{ inputs.package_path }} ${{ inputs.build_parameters }} --show-bin-path)"
-        covpath="$(dirname "$(swift test --package-path ${{ inputs.package_path }} ${{ inputs.build_parameters }} --show-codecov-path)")"
+        binpath="$(swift build --package-path "${pkgpath}" ${{ inputs.build_parameters }} --show-bin-path)"
+        covpath="$(dirname "$(swift test --package-path "${pkgpath}" ${{ inputs.build_parameters }} --show-codecov-path)")"
+        
         binname="${pkgname}PackageTests.xctest"
-        if [[ ${{ runner.os }} == 'macOS' ]]; then binname+="/Contents/MacOS/${pkgname}PackageTests"; fi
+        if [[ '${{ runner.os }}' == 'macOS' ]]; then binname+="/Contents/MacOS/${pkgname}PackageTests"; fi
+        
         echo "COVERAGE_DATA=${covpath}/default.profdata" >>"${GITHUB_ENV}"
         echo "COVERAGE_OBJECT=${binpath}/${binname}" >>"${GITHUB_ENV}"
         echo "COVERAGE_OUTPUT=${covpath}/${pkgname}.lcov" >>"${GITHUB_ENV}"
+
     - id: convert-coverage-report
       shell: bash
       run: |
         $(which xcrun || true) llvm-cov export \
             -format lcov \
             --ignore-filename-regex='/\.build/|(${{ inputs.ignore_paths }})' \
-            -instr-profile="${{ env.COVERAGE_DATA }}" \
-            "${{ env.COVERAGE_OBJECT }}" \
-            >"${{ env.COVERAGE_OUTPUT }}"
+            -instr-profile="${COVERAGE_DATA}" \
+            "${COVERAGE_OBJECT}" \
+            >"${COVERAGE_OUTPUT}"
+
     - id: gather-codecov-params
       shell: bash
       run: |
-        cc_params='{'
-        if [[ -n "${{ inputs.cc_token }}" ]]; then cc_params+='"token": "${{ inputs.cc_token }}", '; fi
-        if [[ -n "${{ inputs.cc_flags }}" ]]; then cc_params+='"flags": "${{ inputs.cc_flags }}", '; fi
-        if [[ -n "${{ inputs.cc_env_vars }}" ]]; then cc_params+='"env_vars": "${{ inputs.cc_env_vars }}", '; fi
-        if [[ -n "${{ inputs.cc_fail_ci_if_error }}" ]]; then cc_params+='"fail_ci_if_error": ${{ inputs.cc_fail_ci_if_error }}, '; fi
-        if [[ -n "${{ inputs.cc_verbose }}" ]]; then cc_params+='"verbose": ${{ inputs.cc_verbose }}, '; fi
-        if [[ -n "${{ inputs.cc_dry_run }}" ]]; then cc_params+='"dry_run": ${{ inputs.cc_dry_run }}, '; fi
-        cc_params+='"files": "${{ env.COVERAGE_OUTPUT }}"}'
-        echo "CODECOV_ACTION_PARAMS=${cc_params}" >>"${GITHUB_ENV}"
+        cc_params=''
+        [[ -n '${{ inputs.cc_token }}' ]]            && cc_params+='"token": "${{ inputs.cc_token }}", '
+        [[ -n '${{ inputs.cc_flags }}' ]]            && cc_params+='"flags": "${{ inputs.cc_flags }}", '
+        [[ -n '${{ inputs.cc_env_vars }}' ]]         && cc_params+='"env_vars": "${{ inputs.cc_env_vars }}", '
+        [[ -n '${{ inputs.cc_fail_ci_if_error }}' ]] && cc_params+='"fail_ci_if_error": ${{ inputs.cc_fail_ci_if_error }}, '
+        [[ -n '${{ inputs.cc_verbose }}' ]]          && cc_params+='"verbose": ${{ inputs.cc_verbose }}, '
+        [[ -n '${{ inputs.cc_dry_run }}' ]]          && cc_params+='"dry_run": ${{ inputs.cc_dry_run }}, '
+                                                        cc_params+='"files": "'"${COVERAGE_OUTPUT}"'
+        echo "CODECOV_ACTION_PARAMS={${cc_params}}" >>"${GITHUB_ENV}"
+
     - id: upload-coverage-report
       uses: codecov/codecov-action@v2
       with: ${{ fromJSON(env.CODECOV_ACTION_PARAMS) }}
+    
     - id: save-converted-output
       shell: bash
       run: |
-        if [[ -n "${{ inputs.output_path }}" ]]; then
-            cp "${{ env.COVERAGE_OUTPUT }}" "${{ inputs.output_path }}"
-        fi
-        echo "::set-output name=output_path::${{ env.COVERAGE_OUTPUT }}"
+        [[ -n '${{ inputs.output_path }}' ]] && cp "${COVERAGE_OUTPUT}" '${{ inputs.output_path }}'
+        echo "::set-output name=output_path::${COVERAGE_OUTPUT}"
