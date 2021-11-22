@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v2
         with: { repository: 'vapor/async-kit' }
       - run: swift test --enable-code-coverage
-      - uses: vapor/swift-codecov-action@v0.1
+      - uses: vapor/swift-codecov-action@main
         with:
           cc_dry_run: true
           cc_flags: unittests
