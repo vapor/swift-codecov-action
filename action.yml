@@ -40,6 +40,11 @@ runs:
     - id: determine-package-info
       shell: bash
       run: |
+        env
+        cat <<'EOF'
+        ${{ toJSON(github) }}
+        ${{ toJSON(runner) }}
+        EOF
         pkgname="$(swift package --package-path ${{ inputs.package_path }} dump-package | \
                    perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')"
         binpath="$(swift build --package-path ${{ inputs.package_path }} ${{ inputs.build_parameters }} --show-bin-path)"
