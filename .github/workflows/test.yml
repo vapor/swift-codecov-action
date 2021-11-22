@@ -1,0 +1,16 @@
+name: test
+on:
+  workflow_dispatch:
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    container: swift:5.5-focal
+    steps:
+      - uses: actions/checkout@v2
+        with: { repository: 'vapor/async-kit' }
+      - run: swift test --enable-code-coverage
+      - uses: vapor/swift-codecov-action@v0.1
+        with:
+          cc_dry_run: true
+          cc_flags: unittests
+          cc_verbose: true
