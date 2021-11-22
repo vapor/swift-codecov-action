@@ -1,0 +1,1 @@
+Nothing much to put here for now - this is a fairly straightforward reusable workflow wrapped around https://github.com/codecov/codecov-action, contributing to it is as simple as opening a pull request. Please feel free to do so!
