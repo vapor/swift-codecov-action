@@ -26,11 +26,6 @@ inputs:
   cc_fail_ci_if_error: { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
   cc_verbose:          { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
   cc_dry_run:          { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
-  
-outputs:
-  codecov_file:
-    description: The absolute path of the converted code coverage data.
-    value: ${{ steps.save-converted-output.outputs.output_path }}
 
 runs:
   using: composite
