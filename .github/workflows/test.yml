@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
-      - uses: vapor/swift-codecov-action@main
+      - uses: vapor/swift-codecov-action@fixups
         with:
           cc_dry_run: true
           cc_flags: unittests
@@ -23,7 +23,7 @@ jobs:
         with: { xcode-version: latest }
       - uses: actions/checkout@v2
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
-      - uses: vapor/swift-codecov-action@main
+      - uses: vapor/swift-codecov-action@fixups
         with:
           cc_dry_run: true
           cc_flags: unittests
@@ -41,7 +41,7 @@ jobs:
         shell: bash
       - run: env
         shell: bash
-      - uses: vapor/swift-codecov-action@main
+      - uses: vapor/swift-codecov-action@fixups
         with:
           cc_dry_run: true
           cc_flags: unittests
