@@ -70,7 +70,7 @@ runs:
         [[ -n '${{ inputs.cc_fail_ci_if_error }}' ]] && cc_params+='"fail_ci_if_error": ${{ inputs.cc_fail_ci_if_error }}, '
         [[ -n '${{ inputs.cc_verbose }}' ]]          && cc_params+='"verbose": ${{ inputs.cc_verbose }}, '
         [[ -n '${{ inputs.cc_dry_run }}' ]]          && cc_params+='"dry_run": ${{ inputs.cc_dry_run }}, '
-                                                        cc_params+='"files": "'"${COVERAGE_OUTPUT}"'"'
+                                                        cc_params+='"files": "'"${COVERAGE_OUTPUT}"'", '
                                                         cc_params+='"root_dir": "'"${COVERAGE_ROOT}"'"'
         echo "CODECOV_ACTION_PARAMS={${cc_params}}" >>"${GITHUB_ENV}"
 
