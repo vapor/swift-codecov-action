@@ -6,23 +6,19 @@ branding:
 
 inputs:
   ignore_paths:
-    description: A list of regular expressions, one per line, which specify paths in the repository which will not be included in the coverage data. By default, the /.build/ folder is always ignored.
+    description: A regular expression which specifies paths in the repository which will not be included in the coverage data. The /.build folder is always ignored.
     required: false
-    default: /Tests/
+    default: '/Tests/'
   package_path:
     description: The location of the repository. Defaults to $GITHUB_WORKSPACE. This will be used as the working_directory for the Codecov upload action.
     required: false
     # N.B.: Can not simply default to github.workspace here, as it will not be correctly updated when the action is called from
     # within a job which runs in a container.
-    default: 
+    default: ''
   build_parameters:
     description: Additional parameters needed by swift build and swift test to disambiguate the correct target and configuration, i.e. -c release. Only flags which affect the output binary path are required.
     required: false
-    default: 
-  output_path:
-    description: An alternate location to store the result of converting the code coverage data. This is _not_ the same as codecov-action's path_to_write_report.
-    required: false
-    default:
+    default: ''
   # The following are passthrough parameters for the Codecov upload action.
   cc_token:            { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
   cc_flags:            { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
@@ -44,6 +40,7 @@ runs:
       shell: bash
       run: |
         if [[ -n '${{ inputs.package_path }}' ]]; then pkgpath='${{ inputs.package_path }}'; else pkgpath="${GITHUB_WORKSPACE}"; fi
+        pkgpath="$(cd "${pkgpath}" && pwd)"
         
         pkgname="$(swift package --package-path "${pkgpath}" dump-package | \
                    perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')"
@@ -53,6 +50,7 @@ runs:
         binname="${pkgname}PackageTests.xctest"
         if [[ '${{ runner.os }}' == 'macOS' ]]; then binname+="/Contents/MacOS/${pkgname}PackageTests"; fi
         
+        echo "COVERAGE_ROOT=${pkgpath}" >>"${GITHUB_ENV}"
         echo "COVERAGE_DATA=${covpath}/default.profdata" >>"${GITHUB_ENV}"
         echo "COVERAGE_OBJECT=${binpath}/${binname}" >>"${GITHUB_ENV}"
         echo "COVERAGE_OUTPUT=${covpath}/${pkgname}.lcov" >>"${GITHUB_ENV}"
@@ -78,14 +76,9 @@ runs:
         [[ -n '${{ inputs.cc_verbose }}' ]]          && cc_params+='"verbose": ${{ inputs.cc_verbose }}, '
         [[ -n '${{ inputs.cc_dry_run }}' ]]          && cc_params+='"dry_run": ${{ inputs.cc_dry_run }}, '
                                                         cc_params+='"files": "'"${COVERAGE_OUTPUT}"'"'
+                                                        cc_params+='"root_dir": "'"${COVERAGE_ROOT}"'"'
         echo "CODECOV_ACTION_PARAMS={${cc_params}}" >>"${GITHUB_ENV}"
 
     - id: upload-coverage-report
       uses: codecov/codecov-action@v2
       with: ${{ fromJSON(env.CODECOV_ACTION_PARAMS) }}
-    
-    - id: save-converted-output
-      shell: bash
-      run: |
-        [[ -n '${{ inputs.output_path }}' ]] && cp "${COVERAGE_OUTPUT}" '${{ inputs.output_path }}'
-        echo "::set-output name=output_path::${COVERAGE_OUTPUT}"
