@@ -75,5 +75,5 @@ runs:
         echo "CODECOV_ACTION_PARAMS={${cc_params}}" >>"${GITHUB_ENV}"
 
     - id: upload-coverage-report
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
       with: ${{ fromJSON(env.CODECOV_ACTION_PARAMS) }}
