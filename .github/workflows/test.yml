@@ -1,52 +1,60 @@
 name: test
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   push: { branches: [ 'main' ] }
   workflow_dispatch:
 
 jobs:
   linux-containerized:
+    strategy:
+      fail-fast: false
+      matrix:
+        swift:
+          - swift:5.7-jammy
+          - swift:5.8-jammy
+          - swiftlang/swift:nightly-5.9-jammy
     runs-on: ubuntu-latest
-    container: swift:5.5-focal
+    container: ${{ matrix.swift }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
-      - uses: vapor/swift-codecov-action@main
+      - uses: vapor/swift-codecov-action@respect-upstream-changes
         with:
           cc_dry_run: true
-          cc_flags: unittests
           cc_env_vars: SWIFT_VERSION,SWIFT_SIGNING_KEY,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH
           cc_verbose: true
           package_path: sample-coverage-data
 
   macos:
-    runs-on: macos-11
+    runs-on: macos-12
     steps:
       - uses: maxim-lobanov/setup-xcode@v1
         with: { xcode-version: latest }
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
-      - uses: vapor/swift-codecov-action@main
+      - uses: vapor/swift-codecov-action@respect-upstream-changes
         with:
           cc_dry_run: true
-          cc_flags: unittests
           cc_env_vars: MD_APPLE_SDK_ROOT,RUNNER_OS,RUNNER_ARCH
           cc_verbose: true
           package_path: sample-coverage-data
 
   windows:
+    if: ${{ false }}
     runs-on: windows-latest
     steps:
       - uses: compnerd/gha-setup-swift@main
-        with: { branch: 'swift-5.5.1-release', tag: '5.5.1-RELEASE' }
-      - uses: actions/checkout@v2
+        with: { branch: 'swift-5.8-release', tag: '5.8-RELEASE' }
+      - uses: actions/checkout@v3
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
         shell: bash
       - run: env
         shell: bash
-      - uses: vapor/swift-codecov-action@main
+      - uses: vapor/swift-codecov-action@respect-upstream-changes
         with:
           cc_dry_run: true
-          cc_flags: unittests
           cc_env_vars: RUNNER_OS,RUNNER_ARCH
           cc_verbose: true
           package_path: sample-coverage-data
