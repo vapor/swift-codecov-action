@@ -34,29 +34,34 @@ runs:
     - id: determine-package-info
       shell: bash
       run: |
-        if [[ -n '${{ inputs.package_path }}' ]]; then pkgpath='${{ inputs.package_path }}'; else pkgpath="${GITHUB_WORKSPACE}"; fi
+        [[ -n '${{ inputs.package_path }}' ]] && pkgpath='${{ inputs.package_path }}' || pkgpath="${GITHUB_WORKSPACE}"
         pkgpath="$(cd "${pkgpath}" && pwd)"
+        echo "COVERAGE_ROOT=${pkgpath}" >>"${GITHUB_ENV}"
         
         pkgname="$(swift package --package-path "${pkgpath}" dump-package | \
                    perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')"
+
         binpath="$(swift build --package-path "${pkgpath}" ${{ inputs.build_parameters }} --show-bin-path)"
-        covpath="$(dirname "$(swift test --package-path "${pkgpath}" ${{ inputs.build_parameters }} --show-codecov-path)")"
-        
         binname="${pkgname}PackageTests.xctest"
-        if [[ '${{ runner.os }}' == 'macOS' ]]; then binname+="/Contents/MacOS/${pkgname}PackageTests"; fi
-        
-        echo "COVERAGE_ROOT=${pkgpath}" >>"${GITHUB_ENV}"
-        echo "COVERAGE_DATA=${covpath}/default.profdata" >>"${GITHUB_ENV}"
+        [[ "$(uname)" == "Darwin" ]] && binname+="/Contents/macOS/${pkgname}PackageTests"
         echo "COVERAGE_OBJECT=${binpath}/${binname}" >>"${GITHUB_ENV}"
-        echo "COVERAGE_OUTPUT=${covpath}/${pkgname}.lcov" >>"${GITHUB_ENV}"
+
+        # https://github.com/apple/swift-package-manager/issues/5853 - broken by 5.8, fixed in 5.9
+        if [[ "$(swift package tools-version --version)" =~ 5\.8\.[0-9]+$ ]]; then
+            covpath="${binpath}/codecov"
+        else
+            covpath="$(dirname "$(swift test --package-path "${pkgpath}" ${{ inputs.build_parameters }} --show-codecov-path)")"
+        fi
+        echo "COVERAGE_DATA=${covpath}/default.profdata" >>"${GITHUB_ENV}"
+        echo "COVERAGE_OUTPUT=${covpath}/${pkgname}.txt" >>"${GITHUB_ENV}"
 
     - id: convert-coverage-report
       shell: bash
       run: |
-        $(which xcrun || true) llvm-cov export \
-            -format lcov \
+        $(which xcrun || true) llvm-cov show \
+            --format=text \
             --ignore-filename-regex='/\.build/|(${{ inputs.ignore_paths }})' \
-            -instr-profile="${COVERAGE_DATA}" \
+            --instr-profile="${COVERAGE_DATA}" \
             "${COVERAGE_OBJECT}" \
             >"${COVERAGE_OUTPUT}"
 
@@ -71,9 +76,10 @@ runs:
         [[ -n '${{ inputs.cc_verbose }}' ]]          && cc_params+='"verbose": ${{ inputs.cc_verbose }}, '
         [[ -n '${{ inputs.cc_dry_run }}' ]]          && cc_params+='"dry_run": ${{ inputs.cc_dry_run }}, '
                                                         cc_params+='"files": "'"${COVERAGE_OUTPUT}"'", '
+                                                        cc_params+='"functionalities": "search", '
                                                         cc_params+='"root_dir": "'"${COVERAGE_ROOT}"'"'
-        echo "CODECOV_ACTION_PARAMS={${cc_params}}" >>"${GITHUB_ENV}"
+        echo "CODECOV_ACTION_PARAMS={${cc_params}}" >>"${GITHUB_OUTPUT}"
 
     - id: upload-coverage-report
       uses: codecov/codecov-action@v3
-      with: ${{ fromJSON(env.CODECOV_ACTION_PARAMS) }}
+      with: ${{ fromJSON(steps.gather-codecov-params.outputs.CODECOV_ACTION_PARAMS) }}
