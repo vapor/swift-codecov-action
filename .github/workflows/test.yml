@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
-      - uses: vapor/swift-codecov-action@respect-upstream-changes
+      - uses: vapor/swift-codecov-action@main
         with:
           cc_dry_run: true
           cc_env_vars: SWIFT_VERSION,SWIFT_SIGNING_KEY,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH
@@ -34,7 +34,7 @@ jobs:
         with: { xcode-version: latest }
       - uses: actions/checkout@v3
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
-      - uses: vapor/swift-codecov-action@respect-upstream-changes
+      - uses: vapor/swift-codecov-action@main
         with:
           cc_dry_run: true
           cc_env_vars: MD_APPLE_SDK_ROOT,RUNNER_OS,RUNNER_ARCH
@@ -46,13 +46,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: compnerd/gha-setup-swift@main
-        with: { branch: 'swift-5.8-release', tag: '5.8-RELEASE' }
+        with: { branch: 'swift-5.8.1-release', tag: '5.8.1-RELEASE' }
       - uses: actions/checkout@v3
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
         shell: bash
       - run: env
         shell: bash
-      - uses: vapor/swift-codecov-action@respect-upstream-changes
+      - uses: vapor/swift-codecov-action@main
         with:
           cc_dry_run: true
           cc_env_vars: RUNNER_OS,RUNNER_ARCH
