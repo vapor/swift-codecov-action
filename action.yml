@@ -40,7 +40,7 @@ runs:
         binpath="$(swift build ${PACKAGE_PATH} ${BUILD_PARAMETERS} --show-bin-path)"
 
         pkgname="$(swift package ${PACKAGE_PATH} describe --type json | perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')"
-        excname="${pkgname}PackageTests.xctest"; [[ -d "${excname}" ]] && excname+="/Contents/macOS/${excname%*.xctest}"
+        excname="${pkgname}PackageTests.xctest"; [[ -d "${binpath}/${excname}" ]] && excname+="/Contents/macOS/${excname%*.xctest}"
 
         # https://github.com/apple/swift-package-manager/issues/5853 - broken by 5.8, fixed in 5.9
         if [[ "$(swift package --version)" =~ 5\.8\.[0-9]+$ ]]; then
