@@ -62,6 +62,7 @@ runs:
         RAISEERR:      ${{ inputs.cc_fail_ci_if_error != '' && format('"fail_ci_if_error":{0},', inputs.cc_fail_ci_if_error) || '' }}
         VERBOSE:       ${{ inputs.cc_verbose          != '' && format('"verbose":{0},',          inputs.cc_verbose)          || '' }}
         DRY_RUN:       ${{ inputs.cc_dry_run          != '' && format('"dry_run":{0},',          inputs.cc_dry_run)          || '' }}
+      shell: bash
       run: |
         $(which xcrun || true) llvm-cov show \
             --format=text \
