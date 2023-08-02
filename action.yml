@@ -34,7 +34,7 @@ runs:
     - id: determine-package-info
       shell: bash
       env:
-        PACKAGE_PATH: ${{ format('--package-path {0}', inputs.package_path != '' && inputs.package_path || github.workspace) }}
+        PACKAGE_PATH: ${{ inputs.package_path != '' && format('--package-path {0}', inputs.package_path) || '' }}
         BUILD_PARAMETERS: ${{ inputs.build_parameters }}
       run: |
         binpath="$(swift build ${PACKAGE_PATH} ${BUILD_PARAMETERS} --show-bin-path)"
@@ -54,7 +54,8 @@ runs:
 
     - id: convert-coverage-report
       env:
-        PACKAGE_PATH:  ${{ inputs.package_path != '' && inputs.package_path || github.workspace }}
+        PACKAGE_PATH:  ${{ inputs.package_path != '' && format('{0}/', inputs.package_path) || '' }}
+        ROOTDIR:       ${{ inputs.package_path != '' && format(',"root_dir":"{0}"', inputs.package_path) || '' }}
         IGNORE_PATHS:  ${{ inputs.ignore_paths }}
         TOKEN:         ${{ inputs.cc_token            != '' && format('"token":"{0}",',          inputs.cc_token)            || '' }}
         FLAGS:         ${{ inputs.cc_flags            != '' && format('"flags":"{0}",',          inputs.cc_flags)            || '' }}
@@ -69,9 +70,9 @@ runs:
             --ignore-filename-regex='/\.build/|(${IGNORE_PATHS})' \
             --instr-profile="${COVERAGE_DATA}" \
             "${COVERAGE_OBJECT}" \
-            >"${PACKAGE_PATH}/codecov.txt"
+            >"${PACKAGE_PATH}codecov.txt"
 
-        printf 'params={%s"files":"codecov.txt","root_dir":"%s"}' "${TOKEN}${FLAGS}${ENVVAR}${RAISEERR}${VERBOSE}${DRY_RUN}" "${PACKAGE_PATH}" >>"${GITHUB_OUTPUT}"
+        printf 'params={%s"files":"codecov.txt"%s}' "${TOKEN}${FLAGS}${ENVVAR}${RAISEERR}${VERBOSE}${DRY_RUN}" "${ROOTDIR}" >>"${GITHUB_OUTPUT}"
 
     - id: upload-coverage-report
       uses: codecov/codecov-action@v3
