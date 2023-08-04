@@ -34,7 +34,7 @@ runs:
     - id: determine-package-info
       shell: bash
       env:
-        PACKAGE_PATH: ${{ inputs.package_path != '' && format('--package-path {0}', inputs.package_path) || '' }}
+        PACKAGE_PATH: ${{ inputs.package_path != '' && format('--package-path={0}', inputs.package_path) || '' }}
         BUILD_PARAMETERS: ${{ inputs.build_parameters }}
       run: |
         binpath="$(swift build ${PACKAGE_PATH} ${BUILD_PARAMETERS} --show-bin-path)"
