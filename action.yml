@@ -67,7 +67,7 @@ runs:
       run: |
         $(which xcrun || true) llvm-cov show \
             --format=text \
-            --ignore-filename-regex='/\.build/|(${IGNORE_PATHS})' \
+            --ignore-filename-regex="/\.build/|(${IGNORE_PATHS})" \
             --instr-profile="${COVERAGE_DATA}" \
             "${COVERAGE_OBJECT}" \
             >"${PACKAGE_PATH}codecov.txt"
