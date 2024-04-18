@@ -5,10 +5,6 @@ branding:
   color: orange
 
 inputs:
-  ignore_paths:
-    description: A regular expression which specifies paths in the repository which will not be included in the coverage data. The /.build folder is always ignored.
-    required: false
-    default: '/Tests/'
   package_path:
     description: The location of the repository. Defaults to $GITHUB_WORKSPACE. This will be used as the working_directory for the Codecov upload action.
     required: false
@@ -19,13 +15,15 @@ inputs:
     description: Additional parameters needed by swift build and swift test to disambiguate the correct target and configuration, i.e. -c release. Only flags which affect the output binary path are required.
     required: false
     default: ''
+  codecov_token:
+    description: The Codecov token for the repository.
+    required: true
   # The following are passthrough parameters for the Codecov upload action.
-  cc_token:            { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
-  cc_flags:            { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
-  cc_env_vars:         { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
-  cc_fail_ci_if_error: { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
-  cc_verbose:          { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
-  cc_dry_run:          { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
+  fail_ci_if_error: { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
+  verbose:          { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
+  dry_run:          { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
+  cc_flags:         { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
+  cc_env_vars:      { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
 
 runs:
   using: composite
@@ -38,7 +36,6 @@ runs:
         BUILD_PARAMETERS: ${{ inputs.build_parameters }}
       run: |
         binpath="$(swift build ${PACKAGE_PATH} ${BUILD_PARAMETERS} --show-bin-path)"
-
         pkgname="$(swift package ${PACKAGE_PATH} describe --type json | perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')"
         excname="${pkgname}PackageTests.xctest"; [[ -d "${binpath}/${excname}" ]] && excname+="/Contents/macOS/${excname%*.xctest}"
 
@@ -54,26 +51,29 @@ runs:
 
     - id: convert-coverage-report
       env:
-        PACKAGE_PATH:  ${{ inputs.package_path != '' && format('{0}/', inputs.package_path) || '' }}
-        ROOTDIR:       ${{ inputs.package_path != '' && format(',"root_dir":"{0}"', inputs.package_path) || '' }}
-        IGNORE_PATHS:  ${{ inputs.ignore_paths }}
-        TOKEN:         ${{ inputs.cc_token            != '' && format('"token":"{0}",',          inputs.cc_token)            || '' }}
-        FLAGS:         ${{ inputs.cc_flags            != '' && format('"flags":"{0}",',          inputs.cc_flags)            || '' }}
-        ENVVAR:        ${{ inputs.cc_env_vars         != '' && format('"env_vars":"{0}",',       inputs.cc_env_vars)         || '' }}
-        RAISEERR:      ${{ inputs.cc_fail_ci_if_error != '' && format('"fail_ci_if_error":{0},', inputs.cc_fail_ci_if_error) || '' }}
-        VERBOSE:       ${{ inputs.cc_verbose          != '' && format('"verbose":{0},',          inputs.cc_verbose)          || '' }}
-        DRY_RUN:       ${{ inputs.cc_dry_run          != '' && format('"dry_run":{0},',          inputs.cc_dry_run)          || '' }}
+        PACKAGE_PATH:  ${{ inputs.package_path     != '' && format('{0}/',                    inputs.package_path)     || '' }}
+        TOKEN:         ${{ inputs.codecov_token }}
+        ROOTDIR:       ${{ inputs.package_path     != '' && format(',"root_dir":"{0}"',       inputs.package_path)     || '' }}
+        RAISEERR:      ${{ inputs.fail_ci_if_error != '' && format(',"fail_ci_if_error":{0}', inputs.fail_ci_if_error) || '' }}
+        VERBOSE:       ${{ inputs.verbose          != '' && format(',"verbose":{0}',          inputs.verbose)          || '' }}
+        DRY_RUN:       ${{ inputs.dry_run          != '' && format(',"dry_run":{0}',          inputs.dry_run)          || '' }}
+        FLAGS:         ${{ inputs.cc_flags         != '' && format(',"flags":"{0}"',          inputs.cc_flags)         || '' }}
+        ENVVARS:       ${{ inputs.cc_env_vars      != '' && format(',"env_vars":"{0}"',       inputs.cc_env_vars)      || '' }}
       shell: bash
       run: |
         $(which xcrun || true) llvm-cov show \
             --format=text \
-            --ignore-filename-regex="/\.build/|(${IGNORE_PATHS})" \
+            --ignore-filename-regex='/\.build/.*' \
             --instr-profile="${COVERAGE_DATA}" \
             "${COVERAGE_OBJECT}" \
             >"${PACKAGE_PATH}codecov.txt"
 
-        printf 'params={%s"files":"codecov.txt"%s}' "${TOKEN}${FLAGS}${ENVVAR}${RAISEERR}${VERBOSE}${DRY_RUN}" "${ROOTDIR}" >>"${GITHUB_OUTPUT}"
+        printf 'params={"token":"%s","files":"codecov.txt","disable_search":true,"working-directory":"%s"%s%s%s%s%s%s}' \
+          "${TOKEN}" \
+          "${PACKAGE_PATH}" \
+          "${ROOTDIR}" "${FLAGS}" "${ENVVARS}" "${RAISEERR}" "${VERBOSE}" "${DRY_RUN}" \
+          >>"${GITHUB_OUTPUT}"
 
     - id: upload-coverage-report
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with: ${{ fromJSON(steps.convert-coverage-report.outputs.params) }}

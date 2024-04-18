@@ -7,38 +7,58 @@ on:
   workflow_dispatch:
 
 jobs:
-  linux-containerized:
-    strategy:
-      fail-fast: false
-      matrix:
-        swift:
-          - swift:5.7-jammy
-          - swift:5.8-jammy
-          - swiftlang/swift:nightly-5.9-jammy
+  linux-containerized-toplevel:
+    strategy: { fail-fast: false, matrix: { swift: ['swift:5.8-jammy', 'swift:5.9-jammy', 'swift:5.10-jammy', 'swiftlang/swift:nightly-6.0-jammy'] } }
     runs-on: ubuntu-latest
     container: ${{ matrix.swift }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - run: swift test --enable-code-coverage
+      - uses: vapor/swift-codecov-action@main
+        with:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+          dry_run: true
+          verbose: true
+
+  linux-containerized-subpath:
+    strategy: { fail-fast: false, matrix: { swift: ['swift:5.8-jammy', 'swift:5.9-jammy', 'swift:5.10-jammy', 'swiftlang/swift:nightly-6.0-jammy'] } }
+    runs-on: ubuntu-latest
+    container: ${{ matrix.swift }}
+    steps:
+      - uses: actions/checkout@v4
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
       - uses: vapor/swift-codecov-action@main
         with:
-          cc_dry_run: true
-          cc_env_vars: SWIFT_VERSION,SWIFT_SIGNING_KEY,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH
-          cc_verbose: true
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+          dry_run: true
+          verbose: true
           package_path: sample-coverage-data
 
-  macos:
-    runs-on: macos-12
+  macos-toplevel:
+    runs-on: macos-14
     steps:
       - uses: maxim-lobanov/setup-xcode@v1
         with: { xcode-version: latest }
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - run: swift test --enable-code-coverage
+      - uses: vapor/swift-codecov-action@main
+        with:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+          dry_run: true
+          verbose: true
+
+  macos-subpath:
+    runs-on: macos-14
+    steps:
+      - uses: maxim-lobanov/setup-xcode@v1
+        with: { xcode-version: latest }
+      - uses: actions/checkout@v4
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
       - uses: vapor/swift-codecov-action@main
         with:
-          cc_dry_run: true
-          cc_env_vars: MD_APPLE_SDK_ROOT,RUNNER_OS,RUNNER_ARCH
-          cc_verbose: true
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+          dry_run: true
+          verbose: true
           package_path: sample-coverage-data
 
   windows:
@@ -46,15 +66,15 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: compnerd/gha-setup-swift@main
-        with: { branch: 'swift-5.8.1-release', tag: '5.8.1-RELEASE' }
-      - uses: actions/checkout@v3
+        with: { branch: 'swift-5.10.0-release', tag: '5.10.0-RELEASE' }
+      - uses: actions/checkout@v4
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
         shell: bash
       - run: env
         shell: bash
       - uses: vapor/swift-codecov-action@main
         with:
-          cc_dry_run: true
-          cc_env_vars: RUNNER_OS,RUNNER_ARCH
-          cc_verbose: true
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+          dry_run: true
+          verbose: true
           package_path: sample-coverage-data
