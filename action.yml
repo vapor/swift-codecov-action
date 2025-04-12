@@ -17,13 +17,14 @@ inputs:
     default: ''
   codecov_token:
     description: The Codecov token for the repository.
-    required: true
+    required: false
+    default: ''
   # The following are passthrough parameters for the Codecov upload action.
   fail_ci_if_error: { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
   verbose:          { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
   dry_run:          { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
-  cc_flags:         { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
-  cc_env_vars:      { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
+  flags:            { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
+  env_vars:         { description: 'See https://github.com/codecov/codecov-action#arguments', required: false, default: '' }
 
 runs:
   using: composite
@@ -57,8 +58,8 @@ runs:
         RAISEERR:      ${{ inputs.fail_ci_if_error != '' && format(',"fail_ci_if_error":{0}', inputs.fail_ci_if_error) || '' }}
         VERBOSE:       ${{ inputs.verbose          != '' && format(',"verbose":{0}',          inputs.verbose)          || '' }}
         DRY_RUN:       ${{ inputs.dry_run          != '' && format(',"dry_run":{0}',          inputs.dry_run)          || '' }}
-        FLAGS:         ${{ inputs.cc_flags         != '' && format(',"flags":"{0}"',          inputs.cc_flags)         || '' }}
-        ENVVARS:       ${{ inputs.cc_env_vars      != '' && format(',"env_vars":"{0}"',       inputs.cc_env_vars)      || '' }}
+        FLAGS:         ${{ inputs.flags            != '' && format(',"flags":"{0}"',          inputs.flags)            || '' }}
+        ENVVARS:       ${{ inputs.env_vars         != '' && format(',"env_vars":"{0}"',       inputs.env_vars)         || '' }}
       shell: bash
       run: |
         $(which xcrun || true) llvm-cov show \
@@ -75,5 +76,5 @@ runs:
           >>"${GITHUB_OUTPUT}"
 
     - id: upload-coverage-report
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with: ${{ fromJSON(steps.convert-coverage-report.outputs.params) }}
