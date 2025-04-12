@@ -1,8 +1,10 @@
-import XCTest
+import Testing
 @testable import SampleCoverageData
 
-final class SampleCoverageDataTests: XCTestCase {
-    func testExample() throws {
-        XCTAssertEqual(SampleCoverageData().text, "Hello, World!")
+@Suite
+struct SampleCoverageDataTests {
+    @Test
+    func example() throws {
+        #expect(SampleCoverageData().text == "Hello, World!")
     }
 }
