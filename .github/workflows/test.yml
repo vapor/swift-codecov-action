@@ -60,7 +60,7 @@ jobs:
           verbose: true
 
   macos-subpath:
-    runs-on: macos-16
+    runs-on: macos-15
     steps:
       - uses: maxim-lobanov/setup-xcode@v1
         with: { xcode-version: latest-stable }
