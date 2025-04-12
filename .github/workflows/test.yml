@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ${{ matrix.swift }}
     steps:
+      - run: apt-get update -y && apt-get install -y curl
       - uses: actions/checkout@v4
       - run: swift test --enable-code-coverage
       - uses: vapor/swift-codecov-action@main
@@ -35,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ${{ matrix.swift }}
     steps:
+      - run: apt-get update -y && apt-get install -y curl
       - uses: actions/checkout@v4
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
       - uses: vapor/swift-codecov-action@main
