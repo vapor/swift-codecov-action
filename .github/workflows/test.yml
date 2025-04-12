@@ -74,7 +74,6 @@ jobs:
           package_path: sample-coverage-data
 
   windows:
-    if: ${{ false }}
     runs-on: windows-latest
     steps:
       - name: Configure dev environment
