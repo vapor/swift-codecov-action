@@ -82,7 +82,7 @@ jobs:
           toolset_version: 14.29
           winsdk: 10.0.22621.0
       - uses: compnerd/gha-setup-swift@main
-        with: { branch: 'swift-6.1-release', tag: '6.1-RELEASE' }
+        with: { branch: 'swift-6.0.3-release', tag: '6.0.3-RELEASE' }
       - uses: actions/checkout@v4
       - run: |
           swift test -Xbuild-tools-swiftc -windows-sdk-root -Xbuild-tools-swiftc "${env:WindowsSdkDir}" -Xbuild-tools-swiftc -windows-sdk-version -Xbuild-tools-swiftc ${env:UCRTVersion} -Xswiftc -windows-sdk-root -Xswiftc "${env:WindowsSdkDir}" -Xswiftc -windows-sdk-version -Xswiftc ${env:UCRTVersion} --package-path sample-coverage-data --enable-code-coverage
