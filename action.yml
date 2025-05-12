@@ -37,7 +37,7 @@ runs:
         BUILD_PARAMETERS: ${{ inputs.build_parameters }}
       run: |
         binpath="$(swift build ${PACKAGE_PATH} ${BUILD_PARAMETERS} --show-bin-path)"
-        pkgname="$(swift package ${PACKAGE_PATH} describe --type json | perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')"
+        pkgname="$(swift package ${PACKAGE_PATH} describe --type json | fgrep -v 'Found unhandled resource at' | perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')"
         excname="${pkgname}PackageTests.xctest"; [[ -d "${binpath}/${excname}" ]] && excname+="/Contents/macOS/${excname%*.xctest}"
 
         # https://github.com/apple/swift-package-manager/issues/5853 - broken by 5.8, fixed in 5.9
