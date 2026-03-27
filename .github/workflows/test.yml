@@ -22,7 +22,7 @@ jobs:
       - run: apt-get update -y && apt-get install -y curl
       - uses: actions/checkout@v6
       - run: swift test --enable-code-coverage
-      - uses: vapor/swift-codecov-action@main
+      - uses: ./
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
           dry_run: true
@@ -41,7 +41,7 @@ jobs:
       - run: apt-get update -y && apt-get install -y curl
       - uses: actions/checkout@v6
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
-      - uses: vapor/swift-codecov-action@main
+      - uses: ./
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
           dry_run: true
@@ -55,7 +55,7 @@ jobs:
         with: { xcode-version: latest-stable }
       - uses: actions/checkout@v6
       - run: swift test --enable-code-coverage
-      - uses: vapor/swift-codecov-action@main
+      - uses: ./
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
           dry_run: true
@@ -68,14 +68,14 @@ jobs:
         with: { xcode-version: latest-stable }
       - uses: actions/checkout@v6
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
-      - uses: vapor/swift-codecov-action@main
+      - uses: ./
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
           dry_run: true
           verbose: true
           package_path: sample-coverage-data
 
-  windows:
+  windows-toplevel:
     runs-on: windows-latest
     steps:
       - name: Install Windows Swift toolchain
@@ -87,7 +87,25 @@ jobs:
       - uses: actions/checkout@v6
       - run: |
           swift test --package-path sample-coverage-data --enable-code-coverage
-      - uses: vapor/swift-codecov-action@main
+      - uses: ./
+        with:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+          dry_run: true
+          verbose: true
+
+  windows-subpath:
+    runs-on: windows-latest
+    steps:
+      - name: Install Windows Swift toolchain
+        uses: compnerd/gha-setup-swift@eeda069c5bc95ac8a9ac5cea7d4f588ae5420ca5 # v0.4.0
+        with:
+          swift-version: swift-6.3-release
+          swift-build: 6.3-RELEASE
+          update-sdk-modules: true
+      - uses: actions/checkout@v6
+      - run: |
+          swift test --package-path sample-coverage-data --enable-code-coverage
+      - uses: ./
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
           dry_run: true
