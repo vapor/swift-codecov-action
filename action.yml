@@ -34,18 +34,12 @@ runs:
       shell: bash
       env:
         PACKAGE_PATH: ${{ inputs.package_path != '' && format('--package-path={0}', inputs.package_path) || '' }}
-        BUILD_PARAMETERS: ${{ inputs.build_parameters }}
+        BUILD_PARAMETERS: ${{ format('{0}', inputs.build_parameters) }}
       run: |
         binpath="$(swift build ${PACKAGE_PATH} ${BUILD_PARAMETERS} --show-bin-path)"
         pkgname="$(swift package ${PACKAGE_PATH} describe --type json | fgrep -v 'Found unhandled resource at' | perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')"
         excname="${pkgname}PackageTests.xctest"; [[ -d "${binpath}/${excname}" ]] && excname+="/Contents/macOS/${excname%*.xctest}"
-
-        # https://github.com/apple/swift-package-manager/issues/5853 - broken by 5.8, fixed in 5.9
-        if [[ "$(swift package --version)" =~ 5\.8\.[0-9]+$ ]]; then
-            covpath="${binpath}/codecov"
-        else
-            covpath="$(dirname "$(swift test ${PACKAGE_PATH} ${BUILD_PARAMETERS} --show-codecov-path)")"
-        fi
+        covpath="$(dirname "$(swift test ${PACKAGE_PATH} ${BUILD_PARAMETERS} --show-codecov-path)")"
 
         echo "COVERAGE_OBJECT=${binpath}/${excname}" >>"${GITHUB_ENV}"
         echo "COVERAGE_DATA=${covpath}/default.profdata" >>"${GITHUB_ENV}"
