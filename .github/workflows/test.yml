@@ -82,7 +82,7 @@ jobs:
         uses: compnerd/gha-setup-swift@eeda069c5bc95ac8a9ac5cea7d4f588ae5420ca5 # v0.4.0
         with:
           swift-version: swift-6.3-release
-          swift-build: swift-6.3-RELEASE
+          swift-build: 6.3-RELEASE
           update-sdk-modules: true
       - uses: actions/checkout@v6
       - run: |
