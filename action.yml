@@ -76,5 +76,5 @@ runs:
           >>"${GITHUB_OUTPUT}"
 
     - id: upload-coverage-report
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
       with: ${{ fromJSON(steps.convert-coverage-report.outputs.params) }}
