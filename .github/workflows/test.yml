@@ -86,7 +86,7 @@ jobs:
           update-sdk-modules: true
       - uses: actions/checkout@v6
       - run: |
-          swift test --package-path sample-coverage-data --enable-code-coverage
+          swift test --enable-code-coverage
       - uses: ./
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
