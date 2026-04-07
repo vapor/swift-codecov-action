@@ -2,9 +2,9 @@ import Testing
 @testable import SampleCoverageData
 
 @Suite
-struct SampleCoverageDataTests {
+struct SampleCoverageDataTests2 {
     @Test
     func example() throws {
-        #expect(SampleCoverageData().text == "Hello, World!")
+        #expect(SampleCoverageData().text2 == "!dlroW, olleH")
     }
 }
