@@ -19,13 +19,24 @@ See [this](https://github.com/codecov/codecov-action?tab=readme-ov-file#usage) f
 
 `swift-codecov-action` accepts the following inputs:
 
-| Name              | Required | Default | Description |
-| ----------------- | -------- | ------- | ----------- |
-| `codecov_token`   | no*      | `""`   | Codecov token for the repository. Required for private repositories or when Codecov requires a token. |
-| `package_path`    | no       | `$GITHUB_WORKSPACE`   | The location of the repository. This will be used as the `working_directory` for the Codecov upload action. |
-| `build_parameters`| no       | `""`   | Extra flags passed to `swift build` and `swift test` to disambiguate the configuration or target (e.g. `-c release`). Only flags that affect the output binary path are required. |
-| `fail_ci_if_error`| no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
-| `verbose`         | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
-| `dry_run`         | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
-| `flags`           | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
-| `env_vars`        | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| Name                 | Required | Default | Description |
+| -------------------- | -------- | ------- | ----------- |
+| `codecov_token`      | no*      | `""`   | Codecov token for the repository. Required for private repositories or when Codecov requires a token. |
+| `package_path`       | no       | `$GITHUB_WORKSPACE`   | The location of the repository. This will be used as the `working_directory` for the Codecov upload action. |
+| `build_parameters`   | no       | `""`   | Extra flags passed to `swift build` and `swift test` to disambiguate the configuration or target (e.g. `-c release`). Only flags that affect the output binary path are required. |
+| `base_sha`           | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `codecov_yml_path`   | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `disable_file_fixes` | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `disable_telem`      | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `dry_run`            | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `env_vars`           | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `fail_ci_if_error`   | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `flags`              | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `override_branch`    | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `override_build`     | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `override_build_url` | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `override_commit`    | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `override_pr`        | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `name`               | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `swift_project`      | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
+| `verbose`            | no       | `""`   | Passed through to [codecov/codecov-action](https://github.com/codecov/codecov-action#arguments) |
