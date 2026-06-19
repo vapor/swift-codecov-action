@@ -21,7 +21,7 @@ jobs:
     container: ${{ matrix.swift }}
     steps:
       - run: apt-get update -y && apt-get install -y curl
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: swift test --enable-code-coverage
       - uses: ./
         with:
@@ -40,7 +40,7 @@ jobs:
     container: ${{ matrix.swift }}
     steps:
       - run: apt-get update -y && apt-get install -y curl
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
       - uses: ./
         with:
@@ -54,7 +54,7 @@ jobs:
     steps:
       - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
         with: { xcode-version: latest-stable }
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: swift test --enable-code-coverage
       - uses: ./
         with:
@@ -67,7 +67,7 @@ jobs:
     steps:
       - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
         with: { xcode-version: latest-stable }
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: swift test --package-path sample-coverage-data --enable-code-coverage
       - uses: ./
         with:
@@ -85,7 +85,7 @@ jobs:
           swift-version: swift-6.3-release
           swift-build: 6.3-RELEASE
           update-sdk-modules: true
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: |
           swift test --enable-code-coverage
       - uses: ./
@@ -103,7 +103,7 @@ jobs:
           swift-version: swift-6.3-release
           swift-build: 6.3-RELEASE
           update-sdk-modules: true
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: |
           swift test --package-path sample-coverage-data --enable-code-coverage
       - uses: ./
