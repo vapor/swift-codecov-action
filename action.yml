@@ -65,6 +65,11 @@ runs:
             covobjs+="--object='${obj}/Contents/macOS/$(basename "${obj}" | sed -Ee 's/\.xctest//')' "
           done
           covobjs="${covobjs/% /}"
+        elif [[ -n "$(find "${binpath}" -name '*.lib' -print)" ]]; then
+          for obj in "${binpath}/"*"-test-runner"; do
+            covobjs+="--object='${obj/-test-runner/.lib}' "
+          done
+          covobjs="${covobjs/% /}"
         else
           for obj in "${binpath}/"*"-test-runner"; do
             covobjs+="--object='${obj/-test-runner/.so}' "
