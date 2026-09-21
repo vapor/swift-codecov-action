@@ -64,7 +64,7 @@ runs:
           for obj in "${binpath}/"*".xctest"; do
             covobjs+="--object='${obj}/Contents/macOS/${obj/.xctest/}' "
           done
-          covobjs="${cobojvs/% /}"
+          covobjs="${covobjs/% /}"
         else
           for obj in "${binpath}/"*"-test-runner"; do
             covobjs+="--object='${obj/-test-runner/.so}' "
