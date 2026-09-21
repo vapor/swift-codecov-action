@@ -60,7 +60,7 @@ runs:
           covobjs="--object='${binpath}/${pkgname}PackageTests.xctest/Contents/macOS/${pkgname}PackageTests'"
         elif [[ -x "${binpath}/${pkgname}PackageTests.xctest" ]]; then
           covobjs="--object='${binpath}/${pkgname}PackageTests.xctest'"
-        elif [[ "${binpath}"/"*".xctest" != "${binpath}/*.xctest" ]]; then
+        elif [[ -n "$(find "${binpath}" -name '*.xctest' -print)" ]]; then
           for obj in "${binpath}"/"*".xctest"; do
             covobjs+="--object='${obj}/Contents/macOS/${obj/.xctest/}' "
           done
