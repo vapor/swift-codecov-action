@@ -51,7 +51,8 @@ runs:
         
         # When the swiftbuild build system is used, the coverage objects are distinct shared libraries. When the legacy
         # build system is used, the .xctest binary is the coverage object. When building on macOS with the legacy build
-        # system, the .xctest path will be a bundle with an executable.
+        # system, the .xctest path will be a bundle with an executable. And when building on macOS with Xcode 27+, there
+        # will be multiple .xctest bundles.
         
         binpath="$(swift build ${PACKAGE_PATH} ${BUILD_PARAMETERS} --show-bin-path)"
         pkgname="$(swift package ${PACKAGE_PATH} describe --type json | fgrep -v 'Found unhandled resource at' | perl -e 'use JSON::PP; print (decode_json(join("",(<>)))->{name});')"
@@ -59,6 +60,11 @@ runs:
           covobjs="--object='${binpath}/${pkgname}PackageTests.xctest/Contents/macOS/${pkgname}PackageTests'"
         elif [[ -x "${binpath}/${pkgname}PackageTests.xctest" ]]; then
           covobjs="--object='${binpath}/${pkgname}PackageTests.xctest'"
+        elif [[ "${binpath}"/"*".xctest" != "${binpath}/*.xctest" ]]; then
+          for obj in "${binpath}"/"*".xctest"; do
+            covobjs+="--object='${obj}/Contents/macOS/${obj/.xctest/}' "
+          done
+          covobjs="${cobojv/% /}"
         else
           for obj in "${binpath}/"*"-test-runner"; do
             covobjs+="--object='${obj/-test-runner/.so}' "
