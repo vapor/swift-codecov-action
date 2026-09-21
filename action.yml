@@ -61,7 +61,7 @@ runs:
         elif [[ -x "${binpath}/${pkgname}PackageTests.xctest" ]]; then
           covobjs="--object='${binpath}/${pkgname}PackageTests.xctest'"
         elif [[ -n "$(find "${binpath}" -name '*.xctest' -print)" ]]; then
-          for obj in "${binpath}"/"*".xctest"; do
+          for obj in "${binpath}/"*".xctest"; do
             covobjs+="--object='${obj}/Contents/macOS/${obj/.xctest/}' "
           done
           covobjs="${cobojv/% /}"
