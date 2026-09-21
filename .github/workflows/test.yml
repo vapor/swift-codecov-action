@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         swift: 
-          - swift:6.3-noble
+          - swift:6.4-noble
           - swiftlang/swift:nightly-main-noble
     runs-on: ubuntu-latest
     container: ${{ matrix.swift }}
@@ -34,7 +34,7 @@ jobs:
       fail-fast: false
       matrix:
         swift:
-          - swift:6.3-noble
+          - swift:6.4-noble
           - swiftlang/swift:nightly-main-noble
     runs-on: ubuntu-latest
     container: ${{ matrix.swift }}
@@ -50,7 +50,7 @@ jobs:
           package_path: sample-coverage-data
 
   macos-toplevel:
-    runs-on: macos-26
+    runs-on: xcode-27
     steps:
       - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
         with: { xcode-version: latest-stable }
@@ -63,7 +63,7 @@ jobs:
           verbose: true
 
   macos-subpath:
-    runs-on: macos-26
+    runs-on: xcode-27
     steps:
       - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
         with: { xcode-version: latest-stable }
@@ -82,8 +82,8 @@ jobs:
       - name: Install Windows Swift toolchain
         uses: compnerd/gha-setup-swift@bbae8ce86bac5a3449f3992b3d88bc4ca25f2057 # v0.5.0
         with:
-          swift-version: swift-6.3-release
-          swift-build: 6.3-RELEASE
+          swift-version: swift-6.4.0-release
+          swift-build: 6.4.0-RELEASE
           update-sdk-modules: true
       - uses: actions/checkout@v7
       - run: |
@@ -100,8 +100,8 @@ jobs:
       - name: Install Windows Swift toolchain
         uses: compnerd/gha-setup-swift@bbae8ce86bac5a3449f3992b3d88bc4ca25f2057 # v0.5.0
         with:
-          swift-version: swift-6.3-release
-          swift-build: 6.3-RELEASE
+          swift-version: swift-6.4.0-release
+          swift-build: 6.4.0-RELEASE
           update-sdk-modules: true
       - uses: actions/checkout@v7
       - run: |
